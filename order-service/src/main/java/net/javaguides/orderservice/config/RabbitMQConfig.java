@@ -8,6 +8,12 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
+
 
 @Configuration
 public class RabbitMQConfig {
@@ -27,16 +33,53 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.binding.email.routing.key}")
     private String emailRoutingKey;
 
+    @Value("${rabbitmq.dlx.exchange.name}")
+    private String dlxExchange;
+
+    @Value("${rabbitmq.dlq.name}")
+    private String dlqName;
+
+
+    // Dead Letter Exchange
+    @Bean
+    public DirectExchange dlxExchange() {
+        return new DirectExchange(dlxExchange);
+    }
+
+    // Dead Letter Queue
+    @Bean
+    public Queue deadLetterQueue() {
+        return new Queue(dlqName);
+    }
+
+    // Binding Dead Letter Queue to Dead Letter Exchange
+    @Bean
+    public Binding dlqBinding() {
+        return BindingBuilder.bind(deadLetterQueue())
+                .to(dlxExchange())
+                .with(dlqName);
+    }
+
     // spring bean for queue - order queue
     @Bean
     public Queue orderQueue(){
-        return QueueBuilder.nonDurable(orderQueue).build();
+        return QueueBuilder
+                .nonDurable(orderQueue)
+                .withArgument("x-ha-policy", "all")
+                .withArgument("x-dead-letter-exchange", dlxExchange)  // Dead Letter Exchange
+                .withArgument("x-dead-letter-routing-key", dlqName)   // Dead Letter Queue Routing Key
+                .ttl(6000).build();
     }
 
     // spring bean for queue - order queue
     @Bean
     public Queue emailQueue(){
-        return  QueueBuilder.nonDurable(emailQueue).build();
+        return  QueueBuilder
+                .nonDurable(emailQueue)
+                .withArgument("x-ha-policy", "all")
+                .withArgument("x-dead-letter-exchange", dlxExchange)  // Dead Letter Exchange
+                .withArgument("x-dead-letter-routing-key", dlqName)   // Dead Letter Queue Routing Key
+                .ttl(6000).build();
     }
 
     // spring bean for exchange
@@ -69,12 +112,19 @@ public class RabbitMQConfig {
         return new Jackson2JsonMessageConverter();
     }
 
+    @Bean
+    public CachingConnectionFactory connectionFactory() {
+        CachingConnectionFactory factory = new CachingConnectionFactory();
+        factory.setPublisherConfirmType(CachingConnectionFactory.ConfirmType.CORRELATED);
+        factory.setPublisherReturns(true); // Enable publisher returns
+        return factory;
+    }
+
     // configure RabbitTemplate
     @Bean
     public AmqpTemplate amqpTemplate(ConnectionFactory connectionFactory){
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(converter());
-
         // Enable publisher confirms
         rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
             if (ack) {
@@ -89,6 +139,26 @@ public class RabbitMQConfig {
         rabbitTemplate.setReturnsCallback(returned -> {
             System.err.println("Message returned: " + returned.getMessage() + " - " + returned.getReplyText());
         });
+        rabbitTemplate.setRetryTemplate(retryTemplate());
         return rabbitTemplate;
+    }
+
+    @Bean
+    public RetryTemplate retryTemplate() {
+        RetryTemplate retryTemplate = new RetryTemplate();
+
+        // Configure retry policy
+        SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
+        retryPolicy.setMaxAttempts(3); // Retry 3 times
+        retryTemplate.setRetryPolicy(retryPolicy);
+
+        // Configure backoff policy
+        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+        backOffPolicy.setInitialInterval(500);
+        backOffPolicy.setMultiplier(2.0);
+        backOffPolicy.setMaxInterval(5000);
+        retryTemplate.setBackOffPolicy(backOffPolicy);
+
+        return retryTemplate;
     }
 }
