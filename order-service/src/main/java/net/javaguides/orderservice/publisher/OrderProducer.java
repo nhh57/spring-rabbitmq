@@ -31,7 +31,7 @@ public class OrderProducer {
         LOGGER.info(String.format("Order event sent to RabbitMQ => %s", orderEvent.toString()));
     try {
         // send an order event to order queue
-        rabbitTemplate.convertAndSend(exchange, "your_routing_key", orderEvent);
+        rabbitTemplate.convertAndSend(exchange, orderRoutingKey, orderEvent);
 
         // send an order event to email queue
         rabbitTemplate.convertAndSend(exchange, emailRoutingKey, orderEvent);

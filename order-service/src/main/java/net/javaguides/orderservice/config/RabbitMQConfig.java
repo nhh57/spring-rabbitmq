@@ -68,7 +68,8 @@ public class RabbitMQConfig {
                 .withArgument("x-ha-policy", "all")
                 .withArgument("x-dead-letter-exchange", dlxExchange)  // Dead Letter Exchange
                 .withArgument("x-dead-letter-routing-key", dlqName)   // Dead Letter Queue Routing Key
-                .ttl(6000).build();
+                .ttl(6000)
+                .build();
     }
 
     // spring bean for queue - order queue
@@ -79,7 +80,8 @@ public class RabbitMQConfig {
                 .withArgument("x-ha-policy", "all")
                 .withArgument("x-dead-letter-exchange", dlxExchange)  // Dead Letter Exchange
                 .withArgument("x-dead-letter-routing-key", dlqName)   // Dead Letter Queue Routing Key
-                .ttl(6000).build();
+                .ttl(6000)
+                .build();
     }
 
     // spring bean for exchange
