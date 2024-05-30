@@ -14,22 +14,7 @@ public class OrderConsumer {
     private Logger LOGGER = LoggerFactory.getLogger(OrderConsumer.class);
 
     @RabbitListener(queues = "${rabbitmq.queue.email.name}")
-    public void consume(OrderEvent event, Channel channel, Message message){
+    public void consume(OrderEvent event){
         LOGGER.info(String.format("Order event received in email service => %s", event.toString()));
-
-        try {
-            // Process the event (e.g., save order event data in the database)
-            // If processing is successful, acknowledge the message
-            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-        } catch (Exception e) {
-            // If processing fails, reject the message and requeue it
-            try {
-                channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, true);
-            } catch (Exception ex) {
-                LOGGER.error("Error during message rejection: ", ex);
-            }
-            LOGGER.error("Error processing message: ", e);
-        }
-
     }
 }

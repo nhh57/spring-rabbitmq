@@ -68,7 +68,7 @@ public class RabbitMQConfig {
                 .withArgument("x-ha-policy", "all")
                 .withArgument("x-dead-letter-exchange", dlxExchange)  // Dead Letter Exchange
                 .withArgument("x-dead-letter-routing-key", dlqName)   // Dead Letter Queue Routing Key
-                .ttl(6000)
+//                .ttl(6000)
                 .build();
     }
 
@@ -80,7 +80,7 @@ public class RabbitMQConfig {
                 .withArgument("x-ha-policy", "all")
                 .withArgument("x-dead-letter-exchange", dlxExchange)  // Dead Letter Exchange
                 .withArgument("x-dead-letter-routing-key", dlqName)   // Dead Letter Queue Routing Key
-                .ttl(6000)
+//                .ttl(6000)
                 .build();
     }
 
@@ -117,6 +117,7 @@ public class RabbitMQConfig {
     @Bean
     public CachingConnectionFactory connectionFactory() {
         CachingConnectionFactory factory = new CachingConnectionFactory();
+        factory.setAddresses("10.56.66.54");
         factory.setPublisherConfirmType(CachingConnectionFactory.ConfirmType.CORRELATED);
         factory.setPublisherReturns(true); // Enable publisher returns
         return factory;
