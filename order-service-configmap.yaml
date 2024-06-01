@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-service-config
+data:
+  RABBITMQ_HOST: "192.168.1.105"
+  SPRING_RABBITMQ_PORT: "5672"
+  SPRING_RABBITMQ_USERNAME: "guest"
+  SPRING_RABBITMQ_PASSWORD: "guest"
+  RABBITMQ_EXCHANGE_NAME: "order_exchange"
+  RABBITMQ_BINDING_ROUTING_KEY: "order_routing_key"
+  RABBITMQ_QUEUE_ORDER_NAME: "order"
+  RABBITMQ_QUEUE_EMAIL_NAME: "email"
+  RABBITMQ_BINDING_EMAIL_ROUTING_KEY: "email_routing_key"
+  RABBITMQ_DLX_EXCHANGE_NAME: "myDLXExchange"
+  RABBITMQ_DLQ_NAME: "myDLQueue"
+  SPRING_RABBITMQ_PUBLISHER_CONFIRM_TYPE: "correlated"
+  SPRING_RABBITMQ_PUBLISHER_RETURNS: "true"

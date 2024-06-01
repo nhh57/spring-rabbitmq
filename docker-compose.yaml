@@ -1,14 +1,14 @@
 version: '3.8'
 services:
-  rabbitmq-service:
-    image: rabbitmq:3.10.5-management
-    container_name: rabbitmq
-    ports:
-      - "15672:15672"
-      - "5672:5672"
-    restart: always
-    networks:
-      backend-rabbitmq:
+#  rabbitmq-service:
+#    image: rabbitmq:3.10.5-management
+#    container_name: rabbitmq
+#    ports:
+#      - "15672:15672"
+#      - "5672:5672"
+#    restart: always
+#    networks:
+#      backend-rabbitmq:
 
   order-service:
     build:
@@ -39,45 +39,45 @@ services:
     depends_on:
       - rabbitmq-service
 
-  email-service:
-    build:
-      context: ./email-service
-      dockerfile: Dockerfile
-    image: email-service:v1.0.0
-    container_name: email-service
-    ports:
-      - "8082:8082"
-    restart: always
-    networks:
-      backend-rabbitmq:
-    environment:
-      RABBITMQ_HOST: 10.56.66.54
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: guest
-      SPRING_RABBITMQ_PASSWORD: guest
-    #        SPRING_RABBITMQ_LISTERNER_SIMPLE_ACKNOWLEDGE_MODE: manual
-    depends_on:
-      - order-service
-
-  stock-service:
-    build:
-      context: ./stock-service
-      dockerfile: Dockerfile
-    image: stock-service:v1.0.0
-    container_name: stock-service
-    ports:
-      - "8081:8081"
-    restart: always
-    networks:
-      backend-rabbitmq:
-    environment:
-      RABBITMQ_HOST: 10.56.66.54
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: guest
-      SPRING_RABBITMQ_PASSWORD: guest
-      SPRING_RABBITMQ_LISTERNER_SIMPLE_ACKNOWLEDGE_MODE: manual
-    depends_on:
-      - order-service
+#  email-service:
+#    build:
+#      context: ./email-service
+#      dockerfile: Dockerfile
+#    image: email-service:v1.0.0
+#    container_name: email-service
+#    ports:
+#      - "8082:8082"
+#    restart: always
+#    networks:
+#      backend-rabbitmq:
+#    environment:
+#      RABBITMQ_HOST: 10.56.66.54
+#      SPRING_RABBITMQ_PORT: 5672
+#      SPRING_RABBITMQ_USERNAME: guest
+#      SPRING_RABBITMQ_PASSWORD: guest
+#    #        SPRING_RABBITMQ_LISTERNER_SIMPLE_ACKNOWLEDGE_MODE: manual
+#    depends_on:
+#      - order-service
+#
+#  stock-service:
+#    build:
+#      context: ./stock-service
+#      dockerfile: Dockerfile
+#    image: stock-service:v1.0.0
+#    container_name: stock-service
+#    ports:
+#      - "8081:8081"
+#    restart: always
+#    networks:
+#      backend-rabbitmq:
+#    environment:
+#      RABBITMQ_HOST: 10.56.66.54
+#      SPRING_RABBITMQ_PORT: 5672
+#      SPRING_RABBITMQ_USERNAME: guest
+#      SPRING_RABBITMQ_PASSWORD: guest
+#      SPRING_RABBITMQ_LISTERNER_SIMPLE_ACKNOWLEDGE_MODE: manual
+#    depends_on:
+#      - order-service
 
 networks:
   backend-rabbitmq:

@@ -40,6 +40,9 @@ public class RabbitMQConfig {
     private String dlqName;
 
 
+    @Value("${spring.rabbitmq.host}")
+    private String address;
+
     // Dead Letter Exchange
     @Bean
     public DirectExchange dlxExchange() {
@@ -117,7 +120,7 @@ public class RabbitMQConfig {
     @Bean
     public CachingConnectionFactory connectionFactory() {
         CachingConnectionFactory factory = new CachingConnectionFactory();
-        factory.setAddresses("10.56.66.54");
+        factory.setAddresses(address);
         factory.setPublisherConfirmType(CachingConnectionFactory.ConfirmType.CORRELATED);
         factory.setPublisherReturns(true); // Enable publisher returns
         return factory;
