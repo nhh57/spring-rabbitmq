@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: order-service-config
 data:
-  RABBITMQ_HOST: "192.168.1.105"
+  RABBITMQ_HOST: "rabbitmq"
   SPRING_RABBITMQ_PORT: "5672"
   SPRING_RABBITMQ_USERNAME: "guest"
   SPRING_RABBITMQ_PASSWORD: "guest"
@@ -16,3 +16,22 @@ data:
   RABBITMQ_DLQ_NAME: "myDLQueue"
   SPRING_RABBITMQ_PUBLISHER_CONFIRM_TYPE: "correlated"
   SPRING_RABBITMQ_PUBLISHER_RETURNS: "true"
+
+
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: email-service-config
+data:
+  SPRING_RABBITMQ_LISTERNER_SIMPLE_ACKNOWLEDGE_MODE: "manual"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: stock-service-config
+data:
+  SPRING_RABBITMQ_LISTERNER_SIMPLE_ACKNOWLEDGE_MODE: "manual"
+

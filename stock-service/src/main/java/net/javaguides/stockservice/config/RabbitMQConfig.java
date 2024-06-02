@@ -1,5 +1,6 @@
 package net.javaguides.stockservice.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -12,10 +13,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    // message converter
     @Bean
     public MessageConverter converter(){
-        return new Jackson2JsonMessageConverter();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules(); // Tự động phát hiện và đăng ký các module Jackson cần thiết
+        return new Jackson2JsonMessageConverter(objectMapper);
     }
 
     // configure RabbitTemplate

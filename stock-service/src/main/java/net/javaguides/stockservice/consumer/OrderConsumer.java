@@ -13,7 +13,7 @@ public class OrderConsumer {
 
     private Logger LOGGER = LoggerFactory.getLogger(OrderConsumer.class);
 
-    @RabbitListener(queues = "${rabbitmq.queue.order.name}")
+    @RabbitListener(queues = "${rabbitmq.queue.stock.name}")
     public void consume(OrderEvent event, Channel channel, Message message){
         LOGGER.info(String.format("Order event received => %s", event.toString()));
 

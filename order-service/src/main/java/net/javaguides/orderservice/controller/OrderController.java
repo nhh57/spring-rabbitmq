@@ -21,16 +21,19 @@ public class OrderController {
     }
 
     @PostMapping("/orders")
-    public String placeOrder(@RequestBody Order order){
+    public String placeOrder(@RequestBody Order order) {
 
         order.setOrderId(UUID.randomUUID().toString());
+        for (int i = 0; i < 10; i++) {
+            order.setName(String.valueOf(i));
+            OrderEvent event = new OrderEvent();
+            event.setStatus("PENDING");
+            event.setMessage("Order is in pending status");
+            event.setOrder(order);
 
-        OrderEvent event = new OrderEvent();
-        event.setStatus("PENDING");
-        event.setMessage("Order is in pending status");
-        event.setOrder(order);
+            orderProducer.sendMessage(event);
+        }
 
-        orderProducer.sendMessage(event);
 
         return "Order sent to the RabbitMQ ..";
     }

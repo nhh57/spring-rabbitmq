@@ -18,60 +18,84 @@ import org.springframework.retry.support.RetryTemplate;
 @Configuration
 public class RabbitMQConfig {
 
-    @Value("${rabbitmq.queue.order.name}")
-    private String orderQueue;
+    @Value("${rabbitmq.queue.stock.name}")
+    private String stockQueue;
 
     @Value("${rabbitmq.queue.email.name}")
     private String emailQueue;
 
-    @Value("${rabbitmq.exchange.name}")
-    private String exchange;
-
-    @Value("${rabbitmq.binding.routing.key}")
-    private String orderRoutingKey;
+    @Value("${rabbitmq.binding.stock.routing.key}")
+    private String stockRoutingKey;
 
     @Value("${rabbitmq.binding.email.routing.key}")
     private String emailRoutingKey;
 
-    @Value("${rabbitmq.dlx.exchange.name}")
-    private String dlxExchange;
+    @Value("${rabbitmq.exchange.name}")
+    private String exchange;
 
-    @Value("${rabbitmq.dlq.name}")
-    private String dlqName;
+    @Value("${rabbitmq.dlx.exchange.email.name}")
+    private String dlxExchangeEmail;
 
+    @Value("${rabbitmq.dlq.email.name}")
+    private String dlqNameEmail;
+
+    @Value("${rabbitmq.dlx.exchange.stock.name}")
+    private String dlxExchangeStock;
+
+    @Value("${rabbitmq.dlq.stock.name}")
+    private String dlqNameStock;
 
     @Value("${spring.rabbitmq.host}")
     private String address;
 
     // Dead Letter Exchange
     @Bean
-    public DirectExchange dlxExchange() {
-        return new DirectExchange(dlxExchange);
+    public DirectExchange dlxExchangeEmail() {
+        return new DirectExchange(dlxExchangeEmail);
+    }
+
+    @Bean
+    public DirectExchange dlxExchangeStock() {
+        return new DirectExchange(dlxExchangeStock);
     }
 
     // Dead Letter Queue
     @Bean
-    public Queue deadLetterQueue() {
-        return new Queue(dlqName);
+    public Queue deadLetterQueueEmail() {
+        return new Queue(dlqNameEmail);
+    }
+
+    // Dead Letter Queue
+    @Bean
+    public Queue deadLetterQueueStock() {
+        return new Queue(dlqNameStock);
     }
 
     // Binding Dead Letter Queue to Dead Letter Exchange
     @Bean
-    public Binding dlqBinding() {
-        return BindingBuilder.bind(deadLetterQueue())
-                .to(dlxExchange())
-                .with(dlqName);
+    public Binding dlqBindingEmail() {
+        return BindingBuilder.bind(deadLetterQueueEmail())
+                .to(dlxExchangeEmail())
+                .with(dlqNameEmail);
+    }
+
+    // Binding Dead Letter Queue to Dead Letter Exchange
+    @Bean
+    public Binding dlqBindingStock() {
+        return BindingBuilder.bind(deadLetterQueueStock())
+                .to(dlxExchangeStock())
+                .with(dlqNameStock);
     }
 
     // spring bean for queue - order queue
     @Bean
-    public Queue orderQueue(){
+    public Queue stockQueue(){
         return QueueBuilder
-                .nonDurable(orderQueue)
-                .withArgument("x-ha-policy", "all")
-                .withArgument("x-dead-letter-exchange", dlxExchange)  // Dead Letter Exchange
-                .withArgument("x-dead-letter-routing-key", dlqName)   // Dead Letter Queue Routing Key
-//                .ttl(6000)
+                .nonDurable(stockQueue)
+                .withArgument("x-dead-letter-exchange", dlxExchangeStock)  // Dead Letter Exchange
+                .withArgument("x-dead-letter-routing-key", dlqNameStock)   // Dead Letter Queue Routing Key
+                .ttl(6000)
+//                .exclusive()
                 .build();
     }
 
@@ -80,14 +104,13 @@ public class RabbitMQConfig {
     public Queue emailQueue(){
         return  QueueBuilder
                 .nonDurable(emailQueue)
-                .withArgument("x-ha-policy", "all")
-                .withArgument("x-dead-letter-exchange", dlxExchange)  // Dead Letter Exchange
-                .withArgument("x-dead-letter-routing-key", dlqName)   // Dead Letter Queue Routing Key
-//                .ttl(6000)
+                .withArgument("x-dead-letter-exchange", dlxExchangeEmail)  // Dead Letter Exchange
+                .withArgument("x-dead-letter-routing-key", dlqNameEmail)   // Dead Letter Queue Routing Key
+                .ttl(6000)
+//                .exclusive() // Cấu hình hàng đợi là exclusive
                 .build();
     }
 
-    // spring bean for exchange
     @Bean
     public TopicExchange exchange(){
         return new TopicExchange(exchange);
@@ -97,9 +120,9 @@ public class RabbitMQConfig {
     @Bean
     public Binding binding(){
         return BindingBuilder
-                .bind(orderQueue())
+                .bind(stockQueue())
                 .to(exchange())
-                .with(orderRoutingKey);
+                .with(stockRoutingKey);
     }
 
     // spring bean for binding between exchange and queue using routing key

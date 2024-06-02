@@ -7,6 +7,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.nio.ByteBuffer;
+
 @Service
 public class OrderProducer {
 
@@ -15,8 +17,8 @@ public class OrderProducer {
     @Value("${rabbitmq.exchange.name}")
     private String exchange;
 
-    @Value("${rabbitmq.binding.routing.key}")
-    private String orderRoutingKey;
+    @Value("${rabbitmq.binding.stock.routing.key}")
+    private String stockRoutingKey;
 
     @Value("${rabbitmq.binding.email.routing.key}")
     private String emailRoutingKey;
@@ -31,7 +33,7 @@ public class OrderProducer {
         LOGGER.info(String.format("Order event sent to RabbitMQ => %s", orderEvent.toString()));
     try {
         // send an order event to order queue
-        rabbitTemplate.convertAndSend(exchange, orderRoutingKey, orderEvent);
+        rabbitTemplate.convertAndSend(exchange, stockRoutingKey, orderEvent);
 
         // send an order event to email queue
         rabbitTemplate.convertAndSend(exchange, emailRoutingKey, orderEvent);
