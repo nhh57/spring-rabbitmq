@@ -8,13 +8,15 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+
 @Service
 public class OrderConsumer {
 
     private Logger LOGGER = LoggerFactory.getLogger(OrderConsumer.class);
 
     @RabbitListener(queues = "${rabbitmq.queue.stock.name}")
-    public void consume(OrderEvent event, Channel channel, Message message){
+    public void consume(OrderEvent event, Channel channel, Message message) {
         LOGGER.info(String.format("Order event received => %s", event.toString()));
 
         try {
@@ -29,6 +31,20 @@ public class OrderConsumer {
                 LOGGER.error("Error during message rejection: ", ex);
             }
             LOGGER.error("Error processing message: ", e);
+        }
+    }
+
+
+    @RabbitListener(queues = "myDLQueueStock")
+    public void consumerToQueueFailed(OrderEvent event, Channel channel, Message message) throws IOException {
+        try {
+            System.out.println("HOT FIX Received message: " + event.toString());
+            // Xử lý thông điệp theo logic của bạn
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+        } catch (Exception e) {
+            System.err.println("Failed to process message: " + e.getMessage());
+            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
+            // Xử lý lỗi theo cách bạn muốn, có thể là requeue hoặc log lỗi
         }
     }
 }

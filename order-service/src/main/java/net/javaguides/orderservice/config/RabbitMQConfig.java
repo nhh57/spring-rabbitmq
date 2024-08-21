@@ -48,44 +48,24 @@ public class RabbitMQConfig {
     @Value("${spring.rabbitmq.host}")
     private String address;
 
-    // Dead Letter Exchange
-    @Bean
-    public DirectExchange dlxExchangeEmail() {
-        return new DirectExchange(dlxExchangeEmail);
-    }
 
-    @Bean
-    public DirectExchange dlxExchangeStock() {
-        return new DirectExchange(dlxExchangeStock);
-    }
-
+//
+//    @Bean
+//    public DirectExchange dlxExchangeStock() {
+//        return new DirectExchange(dlxExchangeStock);
+//    }
     // Dead Letter Queue
-    @Bean
-    public Queue deadLetterQueueEmail() {
-        return new Queue(dlqNameEmail);
-    }
-
-    // Dead Letter Queue
-    @Bean
-    public Queue deadLetterQueueStock() {
-        return new Queue(dlqNameStock);
-    }
-
+//    @Bean
+//    public Queue deadLetterQueueStock() {
+//        return new Queue(dlqNameStock);
+//    }
     // Binding Dead Letter Queue to Dead Letter Exchange
-    @Bean
-    public Binding dlqBindingEmail() {
-        return BindingBuilder.bind(deadLetterQueueEmail())
-                .to(dlxExchangeEmail())
-                .with(dlqNameEmail);
-    }
-
-    // Binding Dead Letter Queue to Dead Letter Exchange
-    @Bean
-    public Binding dlqBindingStock() {
-        return BindingBuilder.bind(deadLetterQueueStock())
-                .to(dlxExchangeStock())
-                .with(dlqNameStock);
-    }
+//    @Bean
+//    public Binding dlqBindingStock() {
+//        return BindingBuilder.bind(deadLetterQueueStock())
+//                .to(dlxExchangeStock())
+//                .with(dlqNameStock);
+//    }
 
     // spring bean for queue - order queue
     @Bean
