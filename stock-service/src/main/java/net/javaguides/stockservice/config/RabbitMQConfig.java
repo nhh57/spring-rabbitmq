@@ -13,12 +13,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    //    @Value("${rabbitmq.dlx.exchange.stock.name}")
-    @Value("myDLXExchangeStock")
+    @Value("${rabbitmq.dlx.exchange.stock.name}")
     private String dlxExchangeStock;
 
-    //    @Value("${rabbitmq.dlq.stock.name}")
-    @Value("myDLQueueStock")
+    @Value("${rabbitmq.dlq.stock.name}")
     private String dlqNameStock;
 
     @Bean

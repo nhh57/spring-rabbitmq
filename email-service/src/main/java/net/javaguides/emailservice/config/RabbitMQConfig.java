@@ -13,12 +13,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    //    @Value("${rabbitmq.dlx.exchange.email.name}")
-    @Value("myDLXExchangeEmail")
+    @Value("${rabbitmq.dlx.exchange.email.name}")
     private String dlxExchangeEmail;
 
-    //    @Value("${rabbitmq.dlq.email.name}")
-    @Value("myDLQueueEmail")
+    @Value("${rabbitmq.dlq.email.name}")
     private String dlqNameEmail;
 
     // Dead Letter Exchange

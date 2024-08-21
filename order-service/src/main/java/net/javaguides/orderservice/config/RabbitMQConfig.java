@@ -49,29 +49,11 @@ public class RabbitMQConfig {
     private String address;
 
 
-//
-//    @Bean
-//    public DirectExchange dlxExchangeStock() {
-//        return new DirectExchange(dlxExchangeStock);
-//    }
-    // Dead Letter Queue
-//    @Bean
-//    public Queue deadLetterQueueStock() {
-//        return new Queue(dlqNameStock);
-//    }
-    // Binding Dead Letter Queue to Dead Letter Exchange
-//    @Bean
-//    public Binding dlqBindingStock() {
-//        return BindingBuilder.bind(deadLetterQueueStock())
-//                .to(dlxExchangeStock())
-//                .with(dlqNameStock);
-//    }
-
     // spring bean for queue - order queue
     @Bean
     public Queue stockQueue(){
         return QueueBuilder
-                .nonDurable(stockQueue)
+                .durable(stockQueue)
                 .withArgument("x-dead-letter-exchange", dlxExchangeStock)  // Dead Letter Exchange
                 .withArgument("x-dead-letter-routing-key", dlqNameStock)   // Dead Letter Queue Routing Key
                 .ttl(6000)
@@ -83,7 +65,7 @@ public class RabbitMQConfig {
     @Bean
     public Queue emailQueue(){
         return  QueueBuilder
-                .nonDurable(emailQueue)
+                .durable(emailQueue)
                 .withArgument("x-dead-letter-exchange", dlxExchangeEmail)  // Dead Letter Exchange
                 .withArgument("x-dead-letter-routing-key", dlqNameEmail)   // Dead Letter Queue Routing Key
                 .ttl(6000)

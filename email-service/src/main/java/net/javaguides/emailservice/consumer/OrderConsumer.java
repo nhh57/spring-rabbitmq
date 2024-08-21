@@ -35,7 +35,7 @@ public class OrderConsumer {
 
 
 
-    @RabbitListener(queues = "myDLQueueEmail")
+    @RabbitListener(queues = "${rabbitmq.dlq.email.name}")
     public void consumerToQueueFailed(OrderEvent event,Channel channel, Message message) throws IOException {
         try {
             System.out.println("HOT FIX Received message: " + event.toString());

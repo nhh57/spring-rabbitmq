@@ -1,14 +1,14 @@
 version: '3.8'
 services:
-#  rabbitmq-service:
-#    image: rabbitmq:3.10.5-management
-#    container_name: rabbitmq
-#    ports:
-#      - "15672:15672"
-#      - "5672:5672"
-#    restart: always
-#    networks:
-#      backend-rabbitmq:
+  rabbitmq-service:
+    image: rabbitmq:3.10.5-management
+    container_name: rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    restart: always
+    networks:
+      backend-rabbitmq:
 
   order-service:
     build:
@@ -22,62 +22,69 @@ services:
     networks:
       backend-rabbitmq:
     environment:
-      RABBITMQ_HOST: 10.56.66.54
+      RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
-
-      RABBITMQ_EXCHANGE_NAME : order_exchange
-      RABBITMQ_BINDING_ROUTING_KEY: order_routing_key
-      RABBITMQ_QUEUE_ORDER_NAME: order
+      RABBITMQ_QUEUE_STOCK_NAME: stock
+      RABBITMQ_BINDING_STOCK_ROUTING_KEY: stock_routing_key
       RABBITMQ_QUEUE_EMAIL_NAME: email
       RABBITMQ_BINDING_EMAIL_ROUTING_KEY: email_routing_key
-      RABBITMQ_DLX_EXCHANGE_NAME: myDLXExchange
-      RABBITMQ_DLQ_NAME: myDLQueue
+      RABBITMQ_EXCHANGE_NAME: order_exchange
+      RABBITMQ_DLX_EXCHANGE_EMAIL_NAME: myDLXExchangeEmail
+      RABBITMQ_DLQ_EMAIL_NAME: myDLQueueEmail
+      RABBITMQ_DLX_EXCHANGE_STOCK_NAME: myDLXExchangeStock
+      RABBITMQ_DLQ_STOCK_NAME: myDLQueueStock
       SPRING_RABBITMQ_PUBLISHER-CONFIRM-TYPE: correlated
       SPRING_RABBITMQ_PUBLISHER-RETURNS: true
     depends_on:
       - rabbitmq-service
 
-#  email-service:
-#    build:
-#      context: ./email-service
-#      dockerfile: Dockerfile
-#    image: email-service:v1.0.0
-#    container_name: email-service
-#    ports:
-#      - "8082:8082"
-#    restart: always
-#    networks:
-#      backend-rabbitmq:
-#    environment:
-#      RABBITMQ_HOST: 10.56.66.54
-#      SPRING_RABBITMQ_PORT: 5672
-#      SPRING_RABBITMQ_USERNAME: guest
-#      SPRING_RABBITMQ_PASSWORD: guest
-#    #        SPRING_RABBITMQ_LISTERNER_SIMPLE_ACKNOWLEDGE_MODE: manual
-#    depends_on:
-#      - order-service
-#
-#  stock-service:
-#    build:
-#      context: ./stock-service
-#      dockerfile: Dockerfile
-#    image: stock-service:v1.0.0
-#    container_name: stock-service
-#    ports:
-#      - "8081:8081"
-#    restart: always
-#    networks:
-#      backend-rabbitmq:
-#    environment:
-#      RABBITMQ_HOST: 10.56.66.54
-#      SPRING_RABBITMQ_PORT: 5672
-#      SPRING_RABBITMQ_USERNAME: guest
-#      SPRING_RABBITMQ_PASSWORD: guest
-#      SPRING_RABBITMQ_LISTERNER_SIMPLE_ACKNOWLEDGE_MODE: manual
-#    depends_on:
-#      - order-service
+  email-service:
+    build:
+      context: ./email-service
+      dockerfile: Dockerfile
+    image: email-service:v1.0.0
+    container_name: email-service
+    ports:
+      - "8082:8082"
+    restart: always
+    networks:
+      backend-rabbitmq:
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      RABBITMQ_QUEUE_EMAIL_NAME: email
+      RABBITMQ_DLX_EXCHANGE_EMAIL_NAME: myDLXExchangeEmail
+      RABBITMQ_DLQ_EMAIL_NAME: myDLQueueEmail
+      SPRING_RABBITMQ_LISTENER_SIMPLE_ACKNOWLEDGE_MODE: manual
+    depends_on:
+      - order-service
+
+  stock-service:
+    build:
+      context: ./stock-service
+      dockerfile: Dockerfile
+    image: stock-service:v1.0.0
+    container_name: stock-service
+    ports:
+      - "8081:8081"
+    restart: always
+    networks:
+      backend-rabbitmq:
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      RABBITMQ_QUEUE_STOCK_NAME: stock
+      RABBITMQ_DLX_EXCHANGE_STOCK_NAME: myDLXExchangeStock
+      RABBITMQ_DLQ_STOCK_NAME: myDLQueueStock
+      SPRING_RABBITMQ_LISTENER_SIMPLE_ACKNOWLEDGE_MODE: manual
+    depends_on:
+      - order-service
 
 networks:
   backend-rabbitmq:
