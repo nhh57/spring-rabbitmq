@@ -32,6 +32,7 @@ public class OrderController {
             event.setOrder(order);
 
             orderProducer.sendMessage(event);
+            orderProducer.sendMessagePubSub(event);
         }
 
 

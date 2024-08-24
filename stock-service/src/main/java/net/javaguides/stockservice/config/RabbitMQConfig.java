@@ -19,6 +19,31 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.dlq.stock.name}")
     private String dlqNameStock;
 
+
+    // Cấu hình Fanout Exchange
+    @Bean
+    public FanoutExchange fanoutExchange() {
+        return new FanoutExchange("hainh");
+    }
+
+    // Cấu hình queue với tên ngẫu nhiên
+    @Bean
+    public Queue anonymousQueue() {
+        return QueueBuilder
+                .nonDurable() // Queue không bền vững, bị xóa khi kết nối bị hủy
+                .autoDelete() // Tự động xóa queue khi không còn sử dụng
+                .withArgument("x-dead-letter-exchange", dlxExchangeStock)  // Dead Letter Exchange
+                .withArgument("x-dead-letter-routing-key", dlqNameStock)   // Dead Letter Queue Routing Key
+                .build();
+    }
+
+    // Binding queue email với Fanout Exchange
+    @Bean
+    public Binding emailQueueBinding() {
+        return BindingBuilder.bind(anonymousQueue()).to(fanoutExchange());
+    }
+
+
     @Bean
     public DirectExchange dlxExchangeStock() {
         return new DirectExchange(dlxExchangeStock);

@@ -49,6 +49,8 @@ public class RabbitMQConfig {
     private String address;
 
 
+    private String nameExchange = "hainh";
+
     // spring bean for queue - order queue
     @Bean
     public Queue stockQueue(){
@@ -71,6 +73,12 @@ public class RabbitMQConfig {
                 .ttl(6000)
 //                .exclusive() // Cấu hình hàng đợi là exclusive
                 .build();
+    }
+
+    // Cấu hình Fanout Exchange
+    @Bean
+    public FanoutExchange fanoutExchange() {
+        return new FanoutExchange(nameExchange);
     }
 
     @Bean

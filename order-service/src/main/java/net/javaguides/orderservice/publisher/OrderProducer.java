@@ -29,17 +29,28 @@ public class OrderProducer {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public void sendMessage(OrderEvent orderEvent){
+    public void sendMessage(OrderEvent orderEvent) {
         LOGGER.info(String.format("Order event sent to RabbitMQ => %s", orderEvent.toString()));
-    try {
-        // send an order event to order queue
-        rabbitTemplate.convertAndSend(exchange, stockRoutingKey, orderEvent);
+        try {
+            // send an order event to order queue
+            rabbitTemplate.convertAndSend(exchange, stockRoutingKey, orderEvent);
 
-        // send an order event to email queue
-        rabbitTemplate.convertAndSend(exchange, emailRoutingKey, orderEvent);
-    }catch (Exception e){
-        LOGGER.info(String.format("Failed to send Message"+e.getMessage()));
+            // send an order event to email queue
+            rabbitTemplate.convertAndSend(exchange, emailRoutingKey, orderEvent);
+        } catch (Exception e) {
+            LOGGER.info(String.format("Failed to send Message" + e.getMessage()));
+        }
+
     }
+
+    public void sendMessagePubSub(OrderEvent orderEvent) {
+        LOGGER.info(String.format("PUBSUB => %s", orderEvent.toString()));
+        try {
+
+            rabbitTemplate.convertAndSend("hainh","",orderEvent);
+        } catch (Exception e) {
+            LOGGER.info(String.format("Failed to send Message" + e.getMessage()));
+        }
 
     }
 }

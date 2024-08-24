@@ -16,21 +16,18 @@ public class OrderConsumer {
     private Logger LOGGER = LoggerFactory.getLogger(OrderConsumer.class);
 
     @RabbitListener(queues = "${rabbitmq.queue.stock.name}")
-    public void consume(OrderEvent event, Channel channel, Message message) {
-        LOGGER.info(String.format("Order event received => %s", event.toString()));
-
+    public void consume(OrderEvent event, Channel channel, Message message) throws IOException {
         try {
-            // Process the event (e.g., save order event data in the database)
-            // If processing is successful, acknowledge the message
-            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-        } catch (Exception e) {
-            // If processing fails, reject the message and requeue it
-            try {
-                channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, true);
-            } catch (Exception ex) {
-                LOGGER.error("Error during message rejection: ", ex);
+            double number = Math.random();
+            System.out.println("===========number::" + number);
+            if (number < 0.5) {
+                throw new IllegalArgumentException("Consume Received notification failed");
             }
-            LOGGER.error("Error processing message: ", e);
+            LOGGER.info(String.format("Order event received in stock service => %s", event.toString()));
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+        } catch (IllegalArgumentException | IOException e) {
+            System.out.println("Error occurred: " + e.getMessage() + ". Tiếp tục xử lý các process khác.");
+            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
         }
     }
 
@@ -38,13 +35,30 @@ public class OrderConsumer {
     @RabbitListener(queues = "${rabbitmq.dlq.stock.name}")
     public void consumerToQueueFailed(OrderEvent event, Channel channel, Message message) throws IOException {
         try {
-            System.out.println("HOT FIX Received message: " + event.toString());
+            System.out.println("HOT FIX in stock Received message: " + event.toString());
             // Xử lý thông điệp theo logic của bạn
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
-            System.err.println("Failed to process message: " + e.getMessage());
+            System.err.println("Failed to process in stock message: " + e.getMessage());
             channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
             // Xử lý lỗi theo cách bạn muốn, có thể là requeue hoặc log lỗi
+        }
+    }
+
+
+    @RabbitListener(queues = "#{anonymousQueue.name}")
+    public void consumePubSub(OrderEvent event, Channel channel, Message message) throws IOException {
+        try {
+            double number = Math.random();
+            System.out.println("===========number::" + number);
+            if (number < 0.5) {
+                throw new IllegalArgumentException("consumePubSub Received notification failed");
+            }
+            LOGGER.info(String.format("consumePubSub -- Order event received in stock service => %s", event.toString()));
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+        } catch (IllegalArgumentException e) {
+            System.out.println("consumePubSub stock Error occurred: " + e.getMessage() + ". Tiếp tục xử lý các process khác.");
+            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
         }
     }
 }
