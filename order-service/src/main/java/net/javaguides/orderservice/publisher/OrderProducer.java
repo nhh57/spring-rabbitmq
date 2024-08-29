@@ -23,6 +23,9 @@ public class OrderProducer {
     @Value("${rabbitmq.binding.email.routing.key}")
     private String emailRoutingKey;
 
+    @Value("${rabbitmq.binding.product.routing.key}")
+    private String productRoutingKey;
+
     private RabbitTemplate rabbitTemplate;
 
     public OrderProducer(RabbitTemplate rabbitTemplate) {
@@ -32,11 +35,14 @@ public class OrderProducer {
     public void sendMessage(OrderEvent orderEvent) {
         LOGGER.info(String.format("Order event sent to RabbitMQ => %s", orderEvent.toString()));
         try {
-            // send an order event to order queue
+            // send an order event to stock queue
             rabbitTemplate.convertAndSend(exchange, stockRoutingKey, orderEvent);
 
             // send an order event to email queue
             rabbitTemplate.convertAndSend(exchange, emailRoutingKey, orderEvent);
+
+            // send an order event to product queue
+            rabbitTemplate.convertAndSend(exchange, productRoutingKey, orderEvent);
         } catch (Exception e) {
             LOGGER.info(String.format("Failed to send Message" + e.getMessage()));
         }
@@ -47,7 +53,7 @@ public class OrderProducer {
         LOGGER.info(String.format("PUBSUB => %s", orderEvent.toString()));
         try {
 
-            rabbitTemplate.convertAndSend("hainh","",orderEvent);
+            rabbitTemplate.convertAndSend("hainh", "", orderEvent);
         } catch (Exception e) {
             LOGGER.info(String.format("Failed to send Message" + e.getMessage()));
         }

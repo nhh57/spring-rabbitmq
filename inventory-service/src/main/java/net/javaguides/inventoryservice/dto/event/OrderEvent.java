@@ -1,9 +1,9 @@
-package net.javaguides.orderservice.dto;
+package net.javaguides.inventoryservice.dto.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.javaguides.orderservice.dto.stock.UpdateProductQuantityInStockRequest;
+import net.javaguides.inventoryservice.dto.request.UpdateProductQuantityInStockRequest;
 
 import java.util.List;
 

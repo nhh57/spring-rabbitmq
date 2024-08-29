@@ -1,4 +1,4 @@
-package net.javaguides.emailservice.config;
+package net.javaguides.inventoryservice.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.*;
@@ -13,11 +13,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    @Value("${rabbitmq.dlx.exchange.email.name}")
-    private String dlxExchangeEmail;
+    @Value("${rabbitmq.dlx.exchange.stock.name}")
+    private String dlxExchangeStock;
 
-    @Value("${rabbitmq.dlq.email.name}")
-    private String dlqNameEmail;
+    @Value("${rabbitmq.dlq.stock.name}")
+    private String dlqNameStock;
 
 
     // Cấu hình Fanout Exchange
@@ -32,8 +32,8 @@ public class RabbitMQConfig {
         return QueueBuilder
                 .nonDurable() // Queue không bền vững, bị xóa khi kết nối bị hủy
                 .autoDelete() // Tự động xóa queue khi không còn sử dụng
-                .withArgument("x-dead-letter-exchange", dlxExchangeEmail)  // Dead Letter Exchange
-                .withArgument("x-dead-letter-routing-key", dlqNameEmail)   // Dead Letter Queue Routing Key
+                .withArgument("x-dead-letter-exchange", dlxExchangeStock)  // Dead Letter Exchange
+                .withArgument("x-dead-letter-routing-key", dlqNameStock)   // Dead Letter Queue Routing Key
                 .exclusive()  // Chỉ kết nối hiện tại mới có thể sử dụng queue này
                 .build();
     }
@@ -45,30 +45,25 @@ public class RabbitMQConfig {
     }
 
 
-    // Dead Letter Exchange
     @Bean
-    public DirectExchange dlxExchangeEmail() {
-        return new DirectExchange(dlxExchangeEmail);
+    public DirectExchange dlxExchangeStock() {
+        return new DirectExchange(dlxExchangeStock);
     }
 
-
-    // Dead Letter Queue
+    //  Dead Letter Queue
     @Bean
-    public Queue deadLetterQueueEmail() {
-        return new Queue(dlqNameEmail);
+    public Queue deadLetterQueueStock() {
+        return new Queue(dlqNameStock);
     }
 
-
-    // Binding Dead Letter Queue to Dead Letter Exchange
+    //    Binding Dead Letter Queue to Dead Letter Exchange
     @Bean
-    public Binding dlqBindingEmail() {
-        return BindingBuilder.bind(deadLetterQueueEmail())
-                .to(dlxExchangeEmail())
-                .with(dlqNameEmail);
+    public Binding dlqBindingStock() {
+        return BindingBuilder.bind(deadLetterQueueStock())
+                .to(dlxExchangeStock())
+                .with(dlqNameStock);
     }
 
-
-    // message converter
     @Bean
     public MessageConverter converter() {
         ObjectMapper objectMapper = new ObjectMapper();

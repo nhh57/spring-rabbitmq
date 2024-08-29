@@ -24,11 +24,17 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.queue.email.name}")
     private String emailQueue;
 
+    @Value("${rabbitmq.queue.product.name}")
+    private String productQueue;
+
     @Value("${rabbitmq.binding.stock.routing.key}")
     private String stockRoutingKey;
 
     @Value("${rabbitmq.binding.email.routing.key}")
     private String emailRoutingKey;
+
+    @Value("${rabbitmq.binding.product.routing.key}")
+    private String productRoutingKey;
 
     @Value("${rabbitmq.exchange.name}")
     private String exchange;
@@ -38,6 +44,12 @@ public class RabbitMQConfig {
 
     @Value("${rabbitmq.dlq.email.name}")
     private String dlqNameEmail;
+
+    @Value("${rabbitmq.dlx.exchange.product.name}")
+    private String dlxExchangeProduct;
+
+    @Value("${rabbitmq.dlq.product.name}")
+    private String dlqNameProduct;
 
     @Value("${rabbitmq.dlx.exchange.stock.name}")
     private String dlxExchangeStock;
@@ -75,6 +87,19 @@ public class RabbitMQConfig {
                 .build();
     }
 
+
+
+    @Bean
+    public Queue productQueue(){
+        return  QueueBuilder
+                .durable(productQueue)
+                .withArgument("x-dead-letter-exchange", dlxExchangeProduct)  // Dead Letter Exchange
+                .withArgument("x-dead-letter-routing-key", dlqNameProduct)   // Dead Letter Queue Routing Key
+                .ttl(6000)
+//                .exclusive() // Cấu hình hàng đợi là exclusive
+                .build();
+    }
+
     // Cấu hình Fanout Exchange
     @Bean
     public FanoutExchange fanoutExchange() {
@@ -102,6 +127,14 @@ public class RabbitMQConfig {
                 .bind(emailQueue())
                 .to(exchange())
                 .with(emailRoutingKey);
+    }
+
+    @Bean
+    public Binding productBinding(){
+        return BindingBuilder
+                .bind(productQueue())
+                .to(exchange())
+                .with(productRoutingKey);
     }
 
     // message converter
