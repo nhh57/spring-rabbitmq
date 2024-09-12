@@ -1,5 +1,6 @@
 version: '3.8'
 services:
+  ## RABBITMQ config
   rabbitmq-service:
     image: rabbitmq:3.10.5-management
     container_name: rabbitmq
@@ -10,11 +11,37 @@ services:
     networks:
       backend-rabbitmq:
 
+  ## MYSQL: config
+  mysql-microservice:
+    image: mysql:8.0.33
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    restart: always
+    networks:
+      backend-rabbitmq:
+    environment:
+      MYSQL_USER: hainh
+      MYSQL_PASSWORD: Admin123
+      MYSQL_ROOT_PASSWORD: Admin123
+      MYSQL_DATABASE: spring-rabbitmq-redis
+
+  ## REDIS config
+  redis-container:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      backend-rabbitmq:
+
+  ## ORDER config
   order-service:
     build:
       context: ./order-service
       dockerfile: Dockerfile
-    image: nhh0507/order-service:v1.0.0
+    image: order-service:v1.0.0
     container_name: order-service
     ports:
       - "8080:8080"
@@ -30,9 +57,13 @@ services:
       RABBITMQ_BINDING_STOCK_ROUTING_KEY: stock_routing_key
       RABBITMQ_QUEUE_EMAIL_NAME: email
       RABBITMQ_BINDING_EMAIL_ROUTING_KEY: email_routing_key
+      RABBITMQ_QUEUE_PRODUCT_NAME: product
+      RABBITMQ_BINDING_PRODUCT_ROUTING_KEY: product_routing_key
       RABBITMQ_EXCHANGE_NAME: order_exchange
       RABBITMQ_DLX_EXCHANGE_EMAIL_NAME: myDLXExchangeEmail
       RABBITMQ_DLQ_EMAIL_NAME: myDLQueueEmail
+      RABBITMQ_DLX_EXCHANGE_PRODUCT_NAME: myDLXExchangeProduct
+      RABBITMQ_DLQ_PRODUCT_NAME: myDLQueueProduct
       RABBITMQ_DLX_EXCHANGE_STOCK_NAME: myDLXExchangeStock
       RABBITMQ_DLQ_STOCK_NAME: myDLQueueStock
       SPRING_RABBITMQ_PUBLISHER-CONFIRM-TYPE: correlated
@@ -40,11 +71,12 @@ services:
     depends_on:
       - rabbitmq-service
 
+  ## EMAIL config
   email-service:
     build:
       context: ./email-service
       dockerfile: Dockerfile
-    image: nhh0507/email-service:v1.0.0
+    image: email-service:v1.0.0
     container_name: email-service
     ports:
       - "8082:8082"
@@ -63,12 +95,13 @@ services:
     depends_on:
       - order-service
 
-  stock-service:
+  ## INVENTORY config
+  inventory-service:
     build:
-      context: ./stock-service
+      context: ./inventory-service
       dockerfile: Dockerfile
-    image: nhh0507/stock-service:v1.0.0
-    container_name: stock-service
+    image: inventory-service:v1.0.0
+    container_name: inventory-service
     ports:
       - "8081:8081"
     restart: always
@@ -83,6 +116,34 @@ services:
       RABBITMQ_DLX_EXCHANGE_STOCK_NAME: myDLXExchangeStock
       RABBITMQ_DLQ_STOCK_NAME: myDLQueueStock
       SPRING_RABBITMQ_LISTENER_SIMPLE_ACKNOWLEDGE_MODE: manual
+      DB_HOST: mysql
+    depends_on:
+      - order-service
+
+  ## PRODUCT config
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    image: product-service:v1.0.0
+    container_name: product-service
+    ports:
+      - "8083:8083"
+    networks:
+      backend-rabbitmq:
+    environment:
+      RABBITMQ_QUEUE_PRODUCT_NAME: product
+      SPRING_RABBITMQ_LISTENER_SIMPLE_PREFETCH: 1
+      RABBITMQ_DLX_EXCHANGE_PRODUCT_NAME: myDLXExchangeProduct
+      RABBITMQ_DLQ_PRODUCT_NAME: myDLQueueProduct
+      RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_RABBITMQ_LISTENER_SIMPLE_ACKNOWLEDGE_MODE: manual
+      DB_HOST: mysql
+      RD_HOST: redis
+      RD_PORT: 6379
     depends_on:
       - order-service
 
