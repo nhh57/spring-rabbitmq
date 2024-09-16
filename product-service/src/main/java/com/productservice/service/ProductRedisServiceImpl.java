@@ -13,6 +13,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 
 @Service
@@ -70,6 +72,7 @@ public class ProductRedisServiceImpl implements IProductRedisService {
         String json = redisObjectMapper.writeValueAsString(productResponses);
         log.info(String.format("====> ProductRedisServiceImpl - saveAllProducts ==== key::: %s, json::: %s", key, json));
         redisTemplate.opsForValue().set(key, json);
+        setTimeToLive(key, 30000);
         log.info("====> ProductRedisServiceImpl - saveAllProducts END ");
     }
 
@@ -86,5 +89,13 @@ public class ProductRedisServiceImpl implements IProductRedisService {
             log.warn(String.format("====> ProductRedisServiceImpl - deleteProductsCache ==== Cache with key '%s' not found or could not be deleted", key));
         }
         log.info("====> ProductRedisServiceImpl - deleteProductsCache END");
+    }
+
+
+    void setTimeToLive(String key, long timeoutInDays) {
+        Random random = new Random();
+        long randomNumber =timeoutInDays+ (random.nextInt(111) + 100);
+        System.out.println("timeTolive::" + randomNumber);
+        redisTemplate.expire(key, randomNumber, TimeUnit.MILLISECONDS);
     }
 }
