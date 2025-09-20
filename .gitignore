@@ -32,6 +32,5 @@ build/
 ### VS Code ###
 .vscode/
 
-/email-service/target/
-/order-service/target/
-/stock-service/target/
+/consumer-service/target/
+/producer-service/target/
